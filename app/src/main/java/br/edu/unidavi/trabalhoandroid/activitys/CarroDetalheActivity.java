@@ -1,7 +1,11 @@
 package br.edu.unidavi.trabalhoandroid.activitys;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -171,8 +175,38 @@ public class CarroDetalheActivity extends AppCompatActivity implements OnMapRead
                 .icon(BitmapDescriptorFactory
                         .fromResource(R.drawable.ic_buiding))
                 .position(unidavi));
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            enableMyLocation = true;
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                Toast.makeText(this, "Por favor, sua localização é necessária",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, 100);
+        }
     }
 
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (mMap != null) {
+                    mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                    mMap.setMyLocationEnabled(true);
+                } else {
+                    enableMyLocation = true;
+                }
+            }
+        }
+    }
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
 
